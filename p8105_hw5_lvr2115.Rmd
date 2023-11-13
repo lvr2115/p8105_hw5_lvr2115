@@ -60,4 +60,34 @@ ggplot(tidy_data, aes(x = week_num, y = obs , color = subject_id)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 ```
 
+## Problem 3
+
+```{r}
+power_ttest = function(n=30, mu=0, sigma = 5) {
+  power_ttest_data = tibble(
+    x = rnorm(n, mean = mu , sd = sigma),
+  )
+
+  power_ttest_data |> 
+    summarize(
+      mu_hat = mean(x),
+      sigma_hat = sd(x)
+    )
+}
+
+model_df = 
+  expand_grid(
+    sample_size = 30,
+    iter = 1:5000
+  ) |> 
+  mutate(
+    estimate_df = map(sample_size, power_ttest)
+  ) |> 
+  unnest(estimate_df)
+```
+
+
+```{r}
+
+```
 
