@@ -44,7 +44,7 @@ tidy_data =
   select(study_arm, subject_id, week_num, obs)
 ```
 
-Make a spaghetti plot showing observations on each subject over time, and comment on differences between groups.
+This spaghetti plot shows observations on each subject in the control and the experimental group over time. This plot shows that the experimental group's observed values increased as the study progressed from week 1 to week 8, showing a positive association between observed value and time. The control group's observed values range do not show this trend. The control group's observed values on week 8 are all lower than the experimental group's observed values on the same week. 
 
 ```{r plot}
 ggplot(tidy_data, aes(x = week_num, y = obs , color = subject_id)) + 
@@ -54,7 +54,8 @@ ggplot(tidy_data, aes(x = week_num, y = obs , color = subject_id)) +
   labs(
     x = "Week", 
     y = "Observed value",
-    title = "Changes in observed value per study arm over time"
+    title = "Changes in observed value per study arm over time",
+    color = "Subject ID"
   ) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 ```
