@@ -98,7 +98,7 @@ Simulation: mu {1 thru 6}
 sim_results_df =
   expand_grid(
     mean_size = 1:6,
-    iteration = 1:5000) |>
+    iteration = 1:500) |>
   mutate(
     result = map(mean_size, ~sim_ttest(mu = .x))) |>
   unnest(result)
@@ -109,27 +109,38 @@ head(sim_results_df)
 ```
 
 # Power plot
+
 This plot shows the proportion of times the null was rejected (the power of the test) on the y-axis and the true value of μ on the x axis.
 
-Describe the association between effect size and power.
-
+We can see that the proportion of rejected increases as true mean increases. Therefore, power is increasing as effect size increases and flattens out as it approaches 1.
 
 ```{r}
 sim_results_df |>
   group_by(mean_size) |>
+  filter(p.value < 0.05) |> 
   summarize(rejected_n = n()) |> 
-    mutate(
-      rejected_n = rejected_n / 5000) |>
+  mutate(
+    rejected_n = rejected_n / 5000
+  ) |> 
   ggplot(aes(x = mean_size,y = rejected_n)) +
-  geom_point() + geom_line()
+  geom_point() + geom_line() +
   labs(
     x = "True mean",
     y = "Power",
-    title = "Power - Different Means")
+    title = "Relationship of power as true mean increases")
 ```
 
 
 Make a plot showing the average estimate of means on the y axis and the true value of μ on the x axis.
+
+```{r}
+sim_results_df |>
+  group_by(mean_size) |> 
+  summarize(avg_estimate = mean(estimate,na.rm = T)) |>
+  ggplot(aes(x = mean_size,y = avg_estimate)) +
+  geom_point()+ geom_line()
+  labs(x = "True Mean",y = "Average Estimate Mean",title = "Estimated Means")
+```
 
 Make a second plot (or overlay on the first) the average estimate of μ̂ only in samples for which the null was rejected on the y axis and the true value of μ on the x axis. Is the sample average of μ̂  across tests for which the null is rejected approximately equal to the true value of μ?
 Why or why not?
