@@ -130,17 +130,26 @@ sim_results_df |>
     title = "Relationship of power as true mean increases")
 ```
 
-
-Make a plot showing the average estimate of means on the y axis and the true value of μ on the x axis.
+This plot shows the average estimate of μ on the y-axis and the true value of μ on the x-axis.
 
 ```{r}
 sim_results_df |>
   group_by(mean_size) |> 
-  summarize(avg_estimate = mean(estimate,na.rm = T)) |>
+  summarize(avg_estimate = mean(estimate)) |>
   ggplot(aes(x = mean_size,y = avg_estimate)) +
-  geom_point()+ geom_line()
-  labs(x = "True Mean",y = "Average Estimate Mean",title = "Estimated Means")
+  geom_point()+ geom_line() +
+  labs(x = "True μ",y = "Average Estimate Mean",title = "Estimated Means")
 ```
 
-Make a second plot (or overlay on the first) the average estimate of μ̂ only in samples for which the null was rejected on the y axis and the true value of μ on the x axis. Is the sample average of μ̂  across tests for which the null is rejected approximately equal to the true value of μ?
-Why or why not?
+This plot shows the average estimate of μ *only in samples for which the null was rejected* on the y-axis and the true value of μ on the x-axis. 
+```{r}
+sim_results_df |>
+  filter(p.value < 0.05) |> 
+  group_by(mean_size) |> 
+  summarize(avg_estimate = mean(estimate)) |>
+  ggplot(aes(x = mean_size,y = avg_estimate)) +
+  geom_point()+ geom_line() +
+  labs(x = "True μ",y = "Average Estimate of μ",title = "Avg estimate of μ compared to true μ when p< 0.05")
+```
+
+The sample average of mu across tests for which the null is rejected is approximately equal to the true value of mu when true mu equals 4, 5 and 6. However, when mu equals 1,2,3 , sample average and true mu are visibly not equal. 
