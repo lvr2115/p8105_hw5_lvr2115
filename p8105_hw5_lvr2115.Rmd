@@ -62,32 +62,45 @@ ggplot(tidy_data, aes(x = week_num, y = obs , color = subject_id)) +
 
 ## Problem 3
 
+
 ```{r}
-power_ttest = function(n=30, mu=0, sigma = 5) {
-  power_ttest_data = tibble(
-    x = rnorm(n, mean = mu , sd = sigma),
+# T-test function
+sim_ttest = function(n=30, mu=0, sigma=5) {
+  
+  ttest_data = tibble(
+    x=rnorm(n,mean=mu,sd=sigma),
   )
 
-  power_ttest_data |> 
-    summarize(
-      mu_hat = mean(x),
-      sigma_hat = sd(x)
-    )
+  ttest_data |>
+    t.test(alpha=0.05) |>
+    broom::tidy() |>
+    select(estimate, p.value)
 }
-
-model_df = 
-  expand_grid(
-    sample_size = 30,
-    iter = 1:5000
-  ) |> 
-  mutate(
-    estimate_df = map(sample_size, power_ttest)
-  ) |> 
-  unnest(estimate_df)
 ```
 
-
+#testing 5000 samples with mean = 0 
 ```{r}
+output = vector("list", 5000) 
+#output: a list of 5000 values
+for (i in 1:500) {
+  output[[i]] = sim_ttest(mu=0) 
+  #for loop: for each index in 1 to 100, im gonna have my output i = the simttest of mu=0
+}
 
+sim_result = bind_rows(output)
+```
+
+#simulation mu {1 thru 6}
+```{r}
+sim_results_df=
+  expand_grid(
+    mu_size=c(1,2,3,4,5,6),
+    iter=1:5000
+  ) |>
+  mutate(
+    estimate_df = map(mu_size, sim_ttest)) |>
+  unnest(estimate_df)
+
+print(estimate_df)
 ```
 
