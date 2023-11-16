@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
 library(ggplot2)
 library(rvest)
+library(purrr)
 ```
 
  
@@ -78,7 +79,8 @@ sim_ttest = function(n=30, mu=0, sigma=5) {
 }
 ```
 
-#testing 5000 samples with mean = 0 
+Testing 5000 samples with mean = 0 
+
 ```{r}
 output = vector("list", 5000) 
 #output: a list of 5000 values
@@ -90,17 +92,43 @@ for (i in 1:500) {
 sim_result = bind_rows(output)
 ```
 
-#simulation mu {1 thru 6}
+Simulation: mu {1 thru 6}
 ```{r}
-sim_results_df=
+sim_results_df =
   expand_grid(
-    mu_size=c(1,2,3,4,5,6),
-    iter=1:5000
-  ) |>
+    mean_size = 1:6,
+    iteration = 1:5000) |>
   mutate(
-    estimate_df = map(mu_size, sim_ttest)) |>
-  unnest(estimate_df)
+    result = map(mean_size, sim_ttest)) |>
+  unnest(result)
 
-print(estimate_df)
+dim(sim_results_df)
+head(sim_results_df)
+
 ```
 
+# Power plot
+This plot shows the proportion of times the null was rejected (the power of the test) on the y-axis and the true value of μ on the x axis.
+
+Describe the association between effect size and power.
+
+
+```{r}
+sim_results_df
+  group_by(mean) |>
+  filter(p.value < 0.05) |>
+  summarize(rejected_n = n()) |> 
+    mutate(
+      rejected_n = rejected_n / 5000) |>
+  ggplot(aes(x = mean,y = rejected_n)) +
+  geom_point() + geom_line()
+  labs(
+    x = "True mean",
+    y = "Power",
+    title = "Power - Different Means")
+```
+
+
+Make a plot showing the average estimate of μ̂ on the y axis and the true value of μ on the x axis.
+Make a second plot (or overlay on the first) the average estimate of μ̂ only in samples for which the null was rejected on the y axis and the true value of μ on the x axis. Is the sample average of μ̂  across tests for which the null is rejected approximately equal to the true value of μ?
+Why or why not?
