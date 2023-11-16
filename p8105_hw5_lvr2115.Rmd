@@ -84,7 +84,7 @@ Testing 5000 samples with mean = 0
 ```{r}
 output = vector("list", 5000) 
 #output: a list of 5000 values
-for (i in 1:500) {
+for (i in 1:5000) {
   output[[i]] = sim_ttest(mu=0) 
   #for loop: for each index in 1 to 100, im gonna have my output i = the simttest of mu=0
 }
@@ -93,13 +93,14 @@ sim_result = bind_rows(output)
 ```
 
 Simulation: mu {1 thru 6}
+
 ```{r}
 sim_results_df =
   expand_grid(
     mean_size = 1:6,
     iteration = 1:5000) |>
   mutate(
-    result = map(mean_size, sim_ttest)) |>
+    result = map(mean_size, ~sim_ttest(mu = .x))) |>
   unnest(result)
 
 dim(sim_results_df)
@@ -114,13 +115,12 @@ Describe the association between effect size and power.
 
 
 ```{r}
-sim_results_df
-  group_by(mean) |>
-  filter(p.value < 0.05) |>
+sim_results_df |>
+  group_by(mean_size) |>
   summarize(rejected_n = n()) |> 
     mutate(
       rejected_n = rejected_n / 5000) |>
-  ggplot(aes(x = mean,y = rejected_n)) +
+  ggplot(aes(x = mean_size,y = rejected_n)) +
   geom_point() + geom_line()
   labs(
     x = "True mean",
@@ -129,6 +129,7 @@ sim_results_df
 ```
 
 
-Make a plot showing the average estimate of μ̂ on the y axis and the true value of μ on the x axis.
+Make a plot showing the average estimate of means on the y axis and the true value of μ on the x axis.
+
 Make a second plot (or overlay on the first) the average estimate of μ̂ only in samples for which the null was rejected on the y axis and the true value of μ on the x axis. Is the sample average of μ̂  across tests for which the null is rejected approximately equal to the true value of μ?
 Why or why not?
