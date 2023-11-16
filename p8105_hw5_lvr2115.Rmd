@@ -84,9 +84,10 @@ sim_ttest = function(n=30, mu=0, sigma=5) {
 ```{r generate samples, echo=TRUE}
 output = vector("list", 5000) 
 #output: a list of 5000 values
+
 for (i in 1:5000) {
   output[[i]] = sim_ttest(mu=0) 
-  #for loop: for each index in 1 to 100, im gonna have my output i = the simttest of mu=0
+#for loop
 }
 
 sim_result = bind_rows(output)
@@ -95,16 +96,16 @@ sim_result = bind_rows(output)
 ### Iteration: mu {1 thru 6}
 
 ```{r iteration, echo=TRUE}
-sim_results_df =
+sim_results=
   expand_grid(
     mean_size = 1:6,
-    iteration = 1:500) |>
+    iteration = 1:5000) |>
   mutate(
     result = map(mean_size, ~sim_ttest(mu = .x))) |>
   unnest(result)
 
-dim(sim_results_df)
-head(sim_results_df)
+dim(sim_results)
+head(sim_results)
 
 ```
 
@@ -113,7 +114,7 @@ This plot shows the proportion of times the null was rejected (the power of the 
 We can see that the proportion of rejected increases as true mean increases. Therefore, power is increasing as effect size increases and flattens out as it approaches 1.
 
 ```{r power and mu plot}
-sim_results_df |>
+sim_results |>
   group_by(mean_size) |>
   filter(p.value < 0.05) |> 
   summarize(rejected_n = n()) |> 
@@ -131,7 +132,7 @@ sim_results_df |>
 This plot shows the average estimate of μ on the y-axis and the true value of μ on the x-axis.
 
 ```{r avg estimate and true mu plot}
-sim_results_df |>
+sim_results |>
   group_by(mean_size) |> 
   summarize(avg_estimate = mean(estimate)) |>
   ggplot(aes(x = mean_size,y = avg_estimate)) +
@@ -143,7 +144,7 @@ This plot shows the average estimate of μ *only in samples for which the null w
 and the true value of μ on the x-axis. 
 
 ```{r avg estimate and tru mu only rejected plot}
-sim_results_df |>
+sim_results |>
   filter(p.value < 0.05) |> 
   group_by(mean_size) |> 
   summarize(avg_estimate = mean(estimate)) |>
